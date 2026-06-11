@@ -38,8 +38,11 @@ async def on_startup():
     finally:
         db.close()
 
-FRONTEND_DIR = os.path.join(os.path.dirname(__file__), "..", "frontend")
-
+# Пытаемся найти папку frontend на уровень выше, если нет — ищем в текущей рабочей директории
+if os.path.exists(os.path.join(os.path.dirname(__file__), "..", "frontend")):
+    FRONTEND_DIR = os.path.join(os.path.dirname(__file__), "..", "frontend")
+else:
+    FRONTEND_DIR = os.path.join(os.getcwd(), "frontend")
 def get_db():
     db = SessionLocal()
     try:
