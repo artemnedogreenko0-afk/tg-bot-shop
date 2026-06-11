@@ -11,8 +11,8 @@ from .database import init_db, SessionLocal, BotModel
 app = FastAPI(title="Telegram Bot Shop API")
 
 # ================= НАСТРОЙКИ КЛИЕНТА =================
-BOT_TOKEN = "ТВОЙ_ТОКЕН_БОТА"  # <--- ВСТАВЬ СВОЙ ТОКЕН ИЗ @BotFather
-ADMIN_PASSWORD = "supersecretpassword"  # <--- ТВОЙ ПАРОЛЬ ОТ АДМИНКИ
+BOT_TOKEN = "8676699098:AAFuOXqcUpEVy_qSz1fHR4ecafBY-X9QTpg"  # <--- ВСТАВЬ СВОЙ ТОКЕН ИЗ @BotFather
+ADMIN_PASSWORD = "190240488"  # <--- ТВОЙ ПАРОЛЬ ОТ АДМИНКИ
 # =====================================================
 
 class BotCreate(BaseModel):
@@ -38,11 +38,9 @@ async def on_startup():
     finally:
         db.close()
 
-# Пытаемся найти папку frontend на уровень выше, если нет — ищем в текущей рабочей директории
-if os.path.exists(os.path.join(os.path.dirname(__file__), "..", "frontend")):
-    FRONTEND_DIR = os.path.join(os.path.dirname(__file__), "..", "frontend")
-else:
-    FRONTEND_DIR = os.path.join(os.getcwd(), "frontend")
+# ЖЕСТКАЯ ПРИВЯЗКА К ПУТИ ВНУТРИ ПАПКИ BACKEND (Для Docker на Render)
+FRONTEND_DIR = os.path.join(os.path.dirname(__file__), "frontend")
+
 def get_db():
     db = SessionLocal()
     try:
@@ -112,14 +110,12 @@ async def telegram_webhook(request: Request, db: Session = Depends(get_db)):
     data = await request.json()
     
     async with httpx.AsyncClient() as client:
-        # Шаг 1: Подтверждение готовности к списанию звезд
         if "pre_checkout_query" in data:
             query_id = data["pre_checkout_query"]["id"]
             answer_url = f"https://api.telegram.org/bot{BOT_TOKEN}/answerPreCheckoutQuery"
             await client.post(answer_url, json={"pre_checkout_query_id": query_id, "ok": True})
             return {"status": "ok"}
 
-        # Шаг 2: Успешное списание — отправляем товар покупателю
         if "message" in data and "successful_payment" in data["message"]:
             payment_info = data["message"]["successful_payment"]
             chat_id = data["message"]["chat"]["id"]
@@ -130,7 +126,6 @@ async def telegram_webhook(request: Request, db: Session = Depends(get_db)):
             bot_item = db.query(BotModel).filter(BotModel.id == bot_id).first()
             bot_name = bot_item.name if bot_item else "Скрипт Telegram Бота"
 
-            # Текст сообщения, который прилетит юзеру в телеграм
             message_url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
             text_to_user = (
                 f"🎉 **Спасибо за оплату!**\n\n"
