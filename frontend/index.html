@@ -15,9 +15,8 @@
                 <i class="fab fa-telegram"></i> BotShop
             </a>
             <nav class="space-x-6">
-                <a href="#" class="hover:text-indigo-400 transition">Каталог</a>
-                <a href="#" class="hover:text-indigo-400 transition">Гарантии</a>
-                <a href="#" class="hover:text-indigo-400 transition">Поддержка</a>
+                <a href="#catalog" class="hover:text-indigo-400 transition">Каталог</a>
+                <a href="/admin" class="hover:text-indigo-400 transition">Админка</a>
             </nav>
         </div>
     </header>
@@ -27,7 +26,7 @@
             Прокачай свой бизнес с <span class="text-indigo-500">Telegram ботами</span>
         </h1>
         <p class="text-gray-400 text-lg md:text-xl max-w-2xl mx-auto mb-8">
-            Готовые решения для автопродаж, модерации чатов и автоматизации. Покупай, настраивай за 5 минут и запускай.
+            Готовые решения для автопродаж, модерации чатов и автоматизации. Покупай за Stars и запускай за 5 минут.
         </p>
         <a href="#catalog" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-8 py-3 rounded-lg shadow-lg transition duration-300">
             Смотреть каталог
@@ -80,12 +79,11 @@
                     container.innerHTML += card;
                 });
             } catch (error) {
-                console.error("Ошибка загрузки ботов:", error);
+                console.error("Ошибка загрузки:", error);
                 document.getElementById('bots-container').innerHTML = '<div class="text-red-500 col-span-full text-center">Не удалось загрузить товары.</div>';
             }
         }
 
-        // Функция покупки через Telegram Stars
         async function buyBot(id) {
             try {
                 const response = await fetch('/api/buy', {
@@ -93,18 +91,14 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ bot_id: id })
                 });
-
                 const data = await response.json();
-
                 if (response.ok && data.invoice_link) {
-                    // Перенаправляем пользователя на платежное окно Telegram
                     window.location.href = data.invoice_link;
                 } else {
-                    alert('Ошибка при создании счета: ' + (data.detail || 'Неизвестная ошибка'));
+                    alert('Ошибка: ' + (data.detail || 'Не удалось создать счет.'));
                 }
             } catch (error) {
-                console.error('Ошибка:', error);
-                alert('Не удалось связаться с сервером оплаты.');
+                alert('Ошибка сети сервера оплаты.');
             }
         }
 
